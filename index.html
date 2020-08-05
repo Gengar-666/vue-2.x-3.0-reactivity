@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mvue</title>
+  <script src="./vue-v2.js"></script>
+  <script src="./vue-next-reactivity.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <h1>{{title}}</h1>
+    <input type="text" v-model="count">
+    <h2>{{count}}</h2>
+  </div>
+
+  <div> - - - - - - - - - - - - - - - - - - - -- - - - - - - - - -</div>
+
+  <h1 id="title"></h1>
+  <h3>increment</h3>
+  <div id="count">0</div>
+  <button onclick="increment()">increment</button>
+  <h3>arrayList</h3>
+  <ul id="list"></ul>
+  <button onclick="addListItem()">add-list-item</button>
+  <h3>delete</h3>
+  <div id="delete-text"></div>
+  <script>
+    // vue-2.x 响应式双向绑定
+    new Mvue({
+      el: '#app',
+      data: {
+        title: 'vue-2.x 响应式双向绑定',
+        count: 1
+      },
+      mounted() {
+        setInterval(() => this.count++, 1000)
+      }
+    })
+
+    // vue3.0 响应式系统
+    let data = { title: '', count: 0, list: [1], deleteText: '这个text再3秒后会被删除' }
+    // 观察数据
+    const proxyData = reactive(data)
+
+    const setTitleEffect = createReactiveEffect(() => {
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+      console.log(`✨ ✨ ✨ ✨ ✨ ✨ 设置title的内容为:${proxyData.title}`)
+      document.querySelector('#title').textContent = proxyData.title
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+    })
+    // 默认执行一遍effect收集依赖
+    setTitleEffect()
+    console.log('🍃 🍃 🍃 🍃 🍃 🍃 设置title')
+    // 设置count的值，会再执行一遍effect
+    proxyData.title = 'vue3.0 响应式系统';
+
+    const setCountEffect = createReactiveEffect(() => {
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+      console.log(`✨ ✨ ✨ ✨ ✨ ✨ 设置id=count的内容为:${proxyData.count}`)
+      document.querySelector('#count').textContent = `count: ${proxyData.count}`
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+    })
+    setCountEffect()
+    const increment = () => proxyData.count++
+
+    const setListEffect = createReactiveEffect(() => {
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ 设置list内容:', proxyData.list[0])
+
+      const ul = document.createElement('ul')
+      proxyData.list.forEach(i => {
+        const li = document.createElement('li')
+        li.textContent = i
+        ul.appendChild(li)
+      })
+
+      const el = document.querySelector('#list')
+      const fragment = document.createDocumentFragment()
+      while (ul.firstChild) {
+        fragment.appendChild(ul.firstChild)
+      }
+      while (el.firstChild) {
+        el.removeChild(el.firstChild)
+      }
+      el.appendChild(fragment)
+
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+    })
+    setListEffect()
+    const addListItem = () => {
+      const { list } = proxyData
+      list.push(list[list.length - 1] + 1)
+    }
+
+    setDeleteTextEffect = createReactiveEffect(() => {
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+      console.log(`✨ ✨ ✨ ✨ ✨ ✨ 设置id=delete-text的内容为:${proxyData.deleteText}`)
+      document.querySelector('#delete-text').textContent = proxyData.deleteText ? proxyData.deleteText : 'text已经被删除'
+      console.log('✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨ ✨')
+    })
+    setDeleteTextEffect()
+    console.log('🍃 🍃 🍃 🍃 🍃 🍃 3秒后删除delete-text')
+    setTimeout(() => delete proxyData.deleteText, 3000);
+
+    console.log(targetMap)
+  </script>
+</body>
+
+</html>
